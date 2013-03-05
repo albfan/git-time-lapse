@@ -17,6 +17,9 @@ function! Display(commit)
 	diffthis
 	wincmd l
 	diffthis
+
+	wincmd j
+	normal gg
 endfunction
 
 function! Goto(pos)
@@ -59,8 +62,11 @@ function! Blame()
 		endif
 	endfor
 
-	exe ':'.line
+	wincmd t
+	wincmd l
+	exe ':'.results[1]
 	normal z.
+	wincmd j
 endfunction
 
 function! GetLog()
