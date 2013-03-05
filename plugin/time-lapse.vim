@@ -1,16 +1,18 @@
 function! Display(commit)
-	windo %d
 	diffoff!
 	wincmd t
-	exe ':silent :0 read !git show '.a:commit.'^:'.t:path
-	exe 'doautocmd filetypedetect BufRead '.t:path
+	exe 'e '.t:path
+	exe 'Gedit '.a:commit.'~1:'.t:path
 
 	wincmd l
-	exe ':silent :0 read !git show '.a:commit.':'.t:path
-	exe 'doautocmd filetypedetect BufRead '.t:path
+	exe 'e '.t:path
+	exe 'Gedit '.a:commit.':'.t:path
+	map <silent> <buffer> <CR> :call Blame() <cr>
 
 	wincmd j
-	exe ':silent :0 read !git log --stat '.a:commit.'^..'.a:commit
+	exe '%d'
+	exe ':silent :0 read !git log --stat -1 '.a:commit
+	exe 'normal ggA ('.(t:total - t:current).' / '.t:total.')'
 	setfiletype git
 
 	wincmd t
@@ -111,6 +113,15 @@ function! TimeLapse()
 	resize 10
 	set winfixheight
 
+	" Go backwards and forwards one commit
+	map <silent> <buffer> <Left> :call Move(1) <cr>
+	map <silent> <buffer> <Right> :call Move(-1) <cr>
+
+	" Rewind all the way to the start or end
+	map <silent> <buffer> <S-Left> :call Goto(t:total - 2) <cr>
+	map <silent> <buffer> <S-Right> :call Goto(0) <cr>
+
+
 	wincmd k
 	vnew
 	set buftype=nofile
@@ -118,14 +129,4 @@ function! TimeLapse()
 	" The first line in the file is the most recent commit
 	let t:current = 0
 	call Display(t:commits[t:current])
-
-	" Go backwards and forwards one commit
-	windo map <buffer> <Left> :call Move(1) <cr>
-	windo map <buffer> <Right> :call Move(-1) <cr>
-
-	" Rewind all the way to the start or end
-	windo map <buffer> <S-Left> :call Goto(t:total - 2) <cr>
-	windo map <buffer> <S-Right> :call Goto(0) <cr>
-
-	windo map <buffer>  :call Blame() <cr>
 endfunction
