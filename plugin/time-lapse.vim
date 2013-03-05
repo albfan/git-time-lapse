@@ -43,12 +43,10 @@ function! Blame()
 	let current = t:commits[t:current]
 	let line = getpos(".")[1]
 
-	let tmpfile = tempname()
-	exe ':silent :read !git blame -s -n -L'.line.','.line.' '.
-				\current.' -- '.t:path.' > '.tmpfile
-	let output = readfile(tmpfile)
-	call delete(tmpfile)
-	let results = split(output[0])
+	let output = system('git blame -p -n -L'.line.','.line.' '.
+						\current.' -- '.t:path)
+
+	let results = split(output)
 
 	if results[0] == "fatal:"
 		return
