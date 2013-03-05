@@ -66,7 +66,6 @@ function! Blame()
 	wincmd l
 	exe ':'.results[1]
 	normal z.
-	wincmd j
 endfunction
 
 function! GetLog()
