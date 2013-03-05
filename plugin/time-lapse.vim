@@ -67,7 +67,7 @@ endfunction
 
 function! GetLog()
 	let tmpfile = tempname()
-	exe ':silent :!git log --pretty=format:"\%H" '.t:path.' > '.tmpfile
+	exe ':silent :!git log --no-merges --pretty=format:"\%H" '.t:path.' > '.tmpfile
 	let t:commits = readfile(tmpfile)
 	call delete(tmpfile)
 	let t:total = len(t:commits)
