@@ -10,7 +10,7 @@ function! Display(commit)
 	exe 'doautocmd filetypedetect BufRead '.t:path
 
 	wincmd j
-	exe ':silent :0 read !git log --stat '.a:commit.'^..'.a:commit
+	exe ':silent :0 read !git log --stat --color=auto '.a:commit.'^..'.a:commit
 	setfiletype git
 
 	wincmd t
