@@ -17,6 +17,9 @@ function! Display(commit)
 	diffthis
 	wincmd l
 	diffthis
+
+	wincmd j
+	normal gg
 endfunction
 
 function! Goto(pos)
@@ -41,14 +44,12 @@ endfunction
 
 function! Blame()
 	let current = t:commits[t:current]
-	let line = getpos(".")[1]
+	let line = line('.')
 
-	let tmpfile = tempname()
-	exe ':silent :read !git blame -s -n -L'.line.','.line.' '.
-				\current.' -- '.t:path.' > '.tmpfile
-	let output = readfile(tmpfile)
-	call delete(tmpfile)
-	let results = split(output[0])
+	let output = system('git blame -p -n -L'.line.','.line.' '.
+						\current.' -- '.t:path)
+
+	let results = split(output)
 
 	if results[0] == "fatal:"
 		return
@@ -61,13 +62,16 @@ function! Blame()
 		endif
 	endfor
 
-	exe ':'.line
+	wincmd t
+	wincmd l
+	exe ':'.results[1]
 	normal z.
+	wincmd j
 endfunction
 
 function! GetLog()
 	let tmpfile = tempname()
-	exe ':silent :!git log --pretty=format:"\%H" '.t:path.' > '.tmpfile
+	exe ':silent :!git log --no-merges --pretty=format:"\%H" '.t:path.' > '.tmpfile
 	let t:commits = readfile(tmpfile)
 	call delete(tmpfile)
 	let t:total = len(t:commits)
@@ -89,6 +93,7 @@ function! TimeLapse()
 	" Open a new tab with a time-lapse view of the file in the current
 	" buffer.
 	let path = ChDir()
+	let here = line('.')
 
 	tabnew
 	let t:path = path
@@ -124,4 +129,10 @@ function! TimeLapse()
 	windo map <buffer> <S-Right> :call Goto(0) <cr>
 
 	windo map <buffer>  :call Blame() <cr>
+
+	" Go to the top right window (which contains the latest version of the
+	" file) and go back to the line we were on when we opened the time-lapse,
+	" so we can immediately Blame from there which is a common use-case.
+	2 wincmd w
+	exe ':'.here
 endfunction
