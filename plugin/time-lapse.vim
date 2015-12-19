@@ -1,8 +1,12 @@
 function! Display(commit)
 	diffoff!
 	wincmd t
-	exe 'e '.t:path
-	exe 'Gedit '.a:commit.'~1:'.t:path
+	if t:current == t:total - 1
+      enew
+   else
+	   exe 'e '.t:path
+	   exe 'Gedit '.a:commit.'~1:'.t:path
+   endif
 
 	wincmd l
 	exe 'e '.t:path
@@ -29,19 +33,17 @@ function! Goto(pos)
 
 	if t:current < 0
 		let t:current = 0
-		return 0
-	elseif t:current >= t:total - 1
-		let t:current = t:total - 2
-		return 0
+      echom "Trying to go above last change"
+	elseif t:current > t:total - 1
+		let t:current = t:total - 1
+      echom "Trying to go beyond first change"
 	endif
 
 	call Display(t:commits[t:current])
-	return 1
 endfunction
 
 function! Move(amount)
-	let t:current = t:current + a:amount
-	call Goto(t:current)
+	call Goto(t:current + a:amount)
 endfunction
 
 function! Blame()
@@ -54,6 +56,7 @@ function! Blame()
 	let results = split(output)
 
 	if results[0] == "fatal:"
+      echom split(output, '\n')[0]
 		return
 	endif
 
