@@ -129,3 +129,6 @@ function! TimeLapse()
 	let t:current = 0
 	call Display(t:commits[t:current])
 endfunction
+
+command! TimeLapse call TimeLapse()
+
